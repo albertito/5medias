@@ -27,6 +27,9 @@ var (
 	addr     = flag.String("addr", ":1080", "address to listen on")
 	username = flag.String("username", "", "username to expect")
 	password = flag.String("password", "", "password to expect")
+
+	allowLoopback = flag.Bool("allow_loopback", false,
+		"allow loopback connections")
 )
 
 func main() {
@@ -85,7 +88,7 @@ func (c *Conn) Handle() {
 	}
 	defer dstConn.Close()
 
-	if dstConn.LocalAddr().(*net.TCPAddr).IP.IsLoopback() {
+	if dstConn.LocalAddr().(*net.TCPAddr).IP.IsLoopback() && !*allowLoopback {
 		c.Logf("loopback connection denied")
 		c.reply(2) // Connection not allowed by ruleset.
 		return

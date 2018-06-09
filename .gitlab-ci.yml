@@ -1,0 +1,18 @@
+# gitlab test integration
+
+image: golang:latest
+
+stages:
+  - test
+
+before_script:
+  - apt-get update -qq && apt-get install -y -qq busybox curl
+  - mkdir -p /go/src/blitiri.com.ar/go/5medias
+  - cp -r $CI_PROJECT_DIR/* /go/src/blitiri.com.ar/go/5medias
+  - cd /go/src/blitiri.com.ar/go/5medias
+  - go get .
+
+test:
+  stage: test
+  script:
+    - ./test/test.sh
