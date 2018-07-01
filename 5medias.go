@@ -24,9 +24,11 @@ import (
 
 // Command-line flags.
 var (
-	addr     = flag.String("addr", ":1080", "address to listen on")
-	username = flag.String("username", "", "username to expect")
-	password = flag.String("password", "", "password to expect")
+	addr        = flag.String("addr", ":1080", "address to listen on")
+	username    = flag.String("username", "", "username to expect")
+	password    = flag.String("password", "", "password to expect")
+	dialTimeout = flag.Duration("dial_timeout", 2*time.Second,
+		"timeout for establishing outgoing connections")
 
 	allowLoopback = flag.Bool("allow_loopback", false,
 		"allow loopback connections")
@@ -80,7 +82,7 @@ func (c *Conn) Handle() {
 	}
 
 	c.Logf("dial %q", dstAddr)
-	dstConn, err := net.DialTimeout("tcp", dstAddr, 10*time.Second)
+	dstConn, err := net.DialTimeout("tcp", dstAddr, *dialTimeout)
 	if err != nil {
 		c.Logf("outgoing connection error: %v", err)
 		c.reply(5) // Connection refused.
