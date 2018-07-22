@@ -69,6 +69,10 @@ func (c *Conn) Logf(f string, a ...interface{}) {
 func (c *Conn) Handle() {
 	defer c.conn.Close()
 
+	// Connetions should attempt to dial within 15s (this deadline is
+	// cancelled before dial below).
+	c.conn.SetDeadline(time.Now().Add(15 * time.Second))
+
 	c.Logf("connected")
 	if err := c.handshake(); err != nil {
 		c.Logf("handshake error: %v", err)
@@ -80,6 +84,9 @@ func (c *Conn) Handle() {
 		c.Logf("request error: %v", err)
 		return
 	}
+
+	// Reset the deadline, now it'll be up to the dial.
+	c.conn.SetDeadline(time.Time{})
 
 	c.Logf("dial %q", dstAddr)
 	dstConn, err := net.DialTimeout("tcp", dstAddr, *dialTimeout)
